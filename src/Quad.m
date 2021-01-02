@@ -1,5 +1,5 @@
 classdef Quad
-  
+  %comment
   properties (Hidden, Constant)
     % Physical properties and constraints
     thrustLimits = [0 0 0 0; 1 1 1 1] * 1.5;
