@@ -46,16 +46,50 @@ classdef MPC_Control_z < MPC_Control
 
       % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are 
       %       the DISCRETE-TIME MODEL of your system
-
+      A = mpc.A;
+      B = mpc.B;
+      Q = 1*eye(n);
+      R = 7;
       % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
       con = [];
       obj = 0;
-
+      M = [1;-1]; 
+      m = [0.3; 0.2];
       
-      
+      F = [0,0;0,0];
+      f = [0;0];
+      [K,Qf,~] = dlqr(A,B,Q,R);
+      K = -K;
       % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      Xf = polytope([F;M*K],[f;m]);
+      Acl = [mpc.A+mpc.B*K];                  % Closed loop A matrix
+
+      while 1
+          prevXf = Xf;
+          [T,t] = double(Xf);
+          preXf = polytope(T*Acl,t);
+          Xf = intersect(Xf, preXf);
       
+          if isequal(prevXf, Xf)
+              break
+          end
+      end
+
+      [Ff,ff] = double(Xf);
+      
+      % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
+      con = (x(:,2) == A*x(:,1) + B*u(:,1)) + (M*u(:,1) <= m);
+      obj = u(:,1)'*R*u(:,1);
+
+      for i = 2:N-1
+          con = con + (x(:,i+1) == A*x(:,i) + B*u(:,i));
+          con = con + (M*u(:,i) <= m);
+          obj = obj + x(:,i)'*Q*x(:,i) + u(:,i)'*R*u(:,i);
+      end
+
+      con = con + (Ff*x(:,N) <= ff);    % Terminal constraint
+      obj = obj + x(:,N)'*Qf*x(:,N);    % Terminal weight
       
       ctrl_opt = optimizer(con, obj, sdpsettings('solver','gurobi'), ...
         {x(:,1), xs, us, d_est}, u(:,1));
