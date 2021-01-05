@@ -51,7 +51,7 @@ classdef MPC_Control
       else
         [u, isfeasible] = mpc.ctrl_opt({x, ref_x, ref_u});
       end
-      assert(isfeasible==0, 'isfeasible in control computationn');
+      assert(isfeasible==0, 'isfeasible in control computation');
     end
   end
   

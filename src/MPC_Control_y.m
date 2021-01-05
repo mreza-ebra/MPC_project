@@ -20,7 +20,7 @@ classdef MPC_Control_y < MPC_Control
       us = sdpvar(m, 1);
       
       % SET THE HORIZON HERE
-      N = 15;
+      N = 20;
       
       % Predicted state and input trajectories
       x = sdpvar(n, N);
@@ -32,48 +32,59 @@ classdef MPC_Control_y < MPC_Control
 
       % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are 
       %       the DISCRETE-TIME MODEL of your system
-      A = mpc.A;
-      B = mpc.B;
-      
+
       % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
-      con = [];
-      obj = 0;
-      
-      Q = 10 * eye(n);
+      Q = 1*eye(size(mpc.A));
       R = 7;
-      
-      % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      M = [1;-1]; 
+
+      % Input Constraints
+      % v in V = { v | Mv <= m }
+      M = [1; -1]; 
       m = [0.3; 0.3];
       
+      % State Constraints
+      % x in X = { x | Fx <= f }
       F = [0 1 0 0; 0 -1 0 0];
-      f = [0.035; 0.035]; %radians
+      f = [0.035; 0.035];
+
+      % Compute LQR controller for unconstrained system
+      [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
+
+      % MATLAB defines K as -K, so invert its signal
+      K = -K;
       
-      [K,Qf,~] = dlqr(A,B,Q,R);
-      
-      Xf = polytope([F; M*K],[f;m]);
-      Acl = [A+B*K];
+      % Compute maximal invariant set
+      Xf = polytope([F; M*K], [f; m]);
+      Acl = [mpc.A + mpc.B*K];                  % Closed loop LQR system
+
       while 1
           prevXf = Xf;
           [T,t] = double(Xf);
           preXf = polytope(T*Acl,t);
           Xf = intersect(Xf, preXf);
+      
           if isequal(prevXf, Xf)
               break
           end
       end
+
       [Ff,ff] = double(Xf);
       
-      con = (x(:,2) == A*x(:,1) + B*u(:,1)) + (M*u(:,1) <= m);
+      % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
+      con = (x(:,2) == mpc.A*x(:,1) + mpc.B*u(:,1)) + (M*u(:,1) <= m);
       obj = u(:,1)'*R*u(:,1);
+
       for i = 2:N-1
-        con = con + (x(:,i+1) == A*x(:,i) + B*u(:,i));
-        con = con + (F*x(:,i) <= f) + (M*u(:,i) <= m);
-        obj = obj + x(:,i)'*Q*x(:,i) + u(:,i)'*R*u(:,i);
+          con = con + (x(:,i+1) == mpc.A*x(:,i) + mpc.B*u(:,i));
+          con = con + (F*x(:,i) <= f) + (M*u(:,i) <= m);
+          obj = obj + x(:,i)'*Q*x(:,i) + u(:,i)'*R*u(:,i);
       end
-      con = con + (Ff*x(:,N) <= ff); % terminal constraint
-      obj = obj + x(:,N)'*Qf*x(:,N); % terminal weight
+
+      con = con + (Ff*x(:,N) <= ff);    % Terminal constraint
+      obj = obj + x(:,N)'*Qf*x(:,N);    % Terminal weight
+      
+      % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
       ctrl_opt = optimizer(con, obj, sdpsettings('solver','gurobi'), ...
         {x(:,1), xs, us}, u(:,1));
