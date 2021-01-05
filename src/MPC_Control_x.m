@@ -72,6 +72,28 @@ classdef MPC_Control_x < MPC_Control
       end
       [Ff,ff] = double(Xf);
       
+      figure
+      hold on; grid on;
+      title('Terminal invariant set for x')
+      
+      subplot(3,1,1)
+      hold on; grid on;
+      Xf.projection(1:2).plot();
+      xlabel('Beta_dot');
+      ylabel('Beta');
+      
+      subplot(3,1,2)
+      hold on; grid on;
+      Xf.projection(2:3).plot();
+      xlabel('Beta');
+      ylabel('x_dot');
+      
+      subplot(3,1,3)
+      hold on; grid on;
+      Xf.projection(3:4).plot();
+      xlabel('x_dot');
+      ylabel('x');
+
       % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
