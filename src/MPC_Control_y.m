@@ -70,6 +70,31 @@ classdef MPC_Control_y < MPC_Control
 
       [Ff,ff] = double(Xf);
       
+      %Plot of terminal invariant set for each of the dimensions
+      
+      figure(4)
+      hold on; grid on;
+      
+      
+      subplot(3,1,1)
+      hold on; grid on;
+      title('Terminal invariant set for the system y');
+      Xf.projection(1:2).plot();
+      xlabel('$\dot{\alpha}[rad/s]$','interpreter','latex');
+      ylabel('$\alpha[rad]$','interpreter','latex');
+      
+      subplot(3,1,2)
+      hold on; grid on;
+      Xf.projection(2:3).plot();
+      xlabel('$\alpha[rad]$','interpreter','latex');
+      ylabel('$\dot{y}[m/s]$','interpreter','latex');
+      
+      subplot(3,1,3)
+      hold on; grid on;
+      Xf.projection(3:4).plot();
+      xlabel('$\dot{y}[m/s]$','interpreter','latex');
+      ylabel('$y[m]$','interpreter','latex');
+      
       % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
       con = (x(:,2) == mpc.A*x(:,1) + mpc.B*u(:,1)) + (M*u(:,1) <= m);
       obj = u(:,1)'*R*u(:,1);

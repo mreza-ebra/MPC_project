@@ -66,6 +66,17 @@ classdef MPC_Control_yaw < MPC_Control
 
       [Ff,ff] = double(Xf);
       
+      %Plot of terminal invariant set for each of the dimensions
+      
+      figure(6)
+      hold on; grid on;
+      title('Terminal invariant set for the system yaw');
+      
+      hold on; grid on;
+      Xf.projection(1:2).plot();
+      xlabel('$\dot{\gamma}[rad/s]$','interpreter','latex');
+      ylabel('$\gamma[rad]$','interpreter','latex');
+      
       % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
       con = (x(:,2) == A*x(:,1) + B*u(:,1)) + (M*u(:,1) <= m);
       obj = u(:,1)'*R*u(:,1);

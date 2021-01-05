@@ -1,5 +1,9 @@
-clear all;
-clc;
+yalmip('clear')
+clear all
+close all
+clc
+
+
 Ts = 0.2;
 Tfinal = 10;
 t = 0:Ts:Tfinal;
@@ -48,6 +52,8 @@ end
 sim = struct();
 sim.x = t(1:end-1)';
 sim.y = sol.x;
+
+figure
 quad.plot(sim,sol.u')
 
 

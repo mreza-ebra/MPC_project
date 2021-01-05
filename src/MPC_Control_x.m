@@ -72,27 +72,30 @@ classdef MPC_Control_x < MPC_Control
       end
       [Ff,ff] = double(Xf);
       
-      figure
+      %Plot of terminal invariant set for each of the dimensions
+      
+      figure(3)
       hold on; grid on;
-      title('Terminal invariant set for x')
+      
       
       subplot(3,1,1)
       hold on; grid on;
+      title('Terminal invariant set for the system x');
       Xf.projection(1:2).plot();
-      xlabel('Beta_dot');
-      ylabel('Beta');
+      xlabel('$\dot{\beta}[rad/s]$','interpreter','latex');
+      ylabel('$\beta[rad]$','interpreter','latex');
       
       subplot(3,1,2)
       hold on; grid on;
       Xf.projection(2:3).plot();
-      xlabel('Beta');
-      ylabel('x_dot');
+      xlabel('$\beta[rad]$','interpreter','latex');
+      ylabel('$\dot{x}[m/s]$','interpreter','latex');
       
       subplot(3,1,3)
       hold on; grid on;
       Xf.projection(3:4).plot();
-      xlabel('x_dot');
-      ylabel('x');
+      xlabel('$\dot{x}[m/s]$','interpreter','latex');
+      ylabel('$x[m]$','interpreter','latex');
 
       % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

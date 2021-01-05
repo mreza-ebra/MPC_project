@@ -101,25 +101,3 @@ hold on; grid on;
 plot(u_hist,'-k','markersize',20,'linewidth',2);
 % plot(t, u_hist,'-k','markersize',20,'linewidth',2);
 ylabel('u_hist')
-
-figure
-      hold on; grid on;
-      title('Terminal invariant set for x')
-      
-      subplot(3,1,1)
-      hold on; grid on;
-      Xf.projection(1:2).plot();
-      xlabel('Beta_dot');
-      ylabel('Beta');
-      
-      subplot(3,1,2)
-      hold on; grid on;
-      Xf.projection(2:3).plot();
-      xlabel('Beta');
-      ylabel('x_dot');
-      
-      subplot(3,1,3)
-      hold on; grid on;
-      Xf.projection(3:4).plot();
-      xlabel('x_dot');
-      ylabel('x');
