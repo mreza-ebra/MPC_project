@@ -46,61 +46,33 @@ classdef MPC_Control_z < MPC_Control
 
       % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are 
       %       the DISCRETE-TIME MODEL of your system
-      A = mpc.A;
-      B = mpc.B;
-      Q = 1*eye(n);
-      R = 7;
+
       % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
-      con = [];
-      obj = 0;
+      Q = 1*eye(size(mpc.A));
+      R = 7;
+
+      % Input Constraints
+      % v in V = { v | Mv <= m }
       M = [1;-1]; 
       m = [0.3; 0.2];
       
-      F = [0,0;0,0];
+      % State Constraints
+      % x in X = { x | Fx <= f }
+      F = [0 0; 0 0];
       f = [0;0];
-      [K,Qf,~] = dlqr(A,B,Q,R);
-      K = -K;
-      % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      Xf = polytope([F;M*K],[f;m]);
-      Acl = [mpc.A+mpc.B*K];                  % Closed loop A matrix
 
-      while 1
-          prevXf = Xf;
-          [T,t] = double(Xf);
-          preXf = polytope(T*Acl,t);
-          Xf = intersect(Xf, preXf);
-      
-          if isequal(prevXf, Xf)
-              break
-          end
-      end
-
-      [Ff,ff] = double(Xf);
-      
-      %Plot of terminal invariant set for each of the dimensions
-      
-      figure(5)
-      hold on; grid on;
-      title('Terminal invariant set for the system z');
-      
-      hold on; grid on;
-      Xf.projection(1:2).plot();
-      xlabel('$\dot{z}[m/s]$','interpreter','latex');
-      ylabel('$z[m]$','interpreter','latex');
-      
-      % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
-      con = (x(:,2) == A*x(:,1) + B*u(:,1)) + (M*u(:,1) <= m);
-      obj = u(:,1)'*R*u(:,1);
+    % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
+      con = (x(:,2) == mpc.A*x(:,1) + mpc.B*u(:,1)) + (M*u(:,1) <= m);
+      obj = (u(:,1)-us)'*R*(u(:,1)-us);
 
       for i = 2:N-1
-          con = con + (x(:,i+1) == A*x(:,i) + B*u(:,i));
+          con = con + (x(:,i+1) == mpc.A*x(:,i) + mpc.B*u(:,i));
           con = con + (M*u(:,i) <= m);
-          obj = obj + x(:,i)'*Q*x(:,i) + u(:,i)'*R*u(:,i);
+          obj = obj + (x(:,i)-xs)'*Q*(x(:,i)-xs) + (u(:,i)-us)'*R*(u(:,i)-us);
       end
-
-      con = con + (Ff*x(:,N) <= ff);    % Terminal constraint
-      obj = obj + x(:,N)'*Qf*x(:,N);    % Terminal weight
+     
+      % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
       ctrl_opt = optimizer(con, obj, sdpsettings('solver','gurobi'), ...
         {x(:,1), xs, us, d_est}, u(:,1));
@@ -114,7 +86,6 @@ classdef MPC_Control_z < MPC_Control
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % INPUTS
       %   ref    - reference to track
-      %   d_est  - disturbance estimate
       % OUTPUTS
       %   xs, us - steady-state target
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,25 +95,19 @@ classdef MPC_Control_z < MPC_Control
       xs = sdpvar(n, 1);
       us = sdpvar;
       
-      % Reference position (Ignore this before Todo 3.3)
-      ref = sdpvar;
+      % Reference position (Ignore this before Todo 3.2)
+      ref = sdpvar;  
+      
             
-      % Disturbance estimate (Ignore this before Part 5)
-      d_est = sdpvar(1);
-      
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
       % You can use the matrices mpc.A, mpc.B, mpc.C and mpc.D
-      con = [];
-      obj = 0;
-      
-
-      % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      con = [-0.2 <= us <= 0.3, ...
+          xs == mpc.A*xs + mpc.B*us, ...
+          ref == mpc.C*xs + mpc.B(2)*us];
+      obj = us^2;
       
       
       % Compute the steady-state target
-      target_opt = optimizer(con, obj, sdpsettings('solver', 'gurobi'), {ref, d_est}, {xs, us});
+      target_opt = optimizer(con, obj, sdpsettings('solver', 'gurobi'), ref, {xs, us});
     end
     
     
