@@ -24,8 +24,8 @@ ctrl = quad.merge_controllers(mpc_x, mpc_y, mpc_z, mpc_yaw);
 sol.u(:,1) = zeros(4,1); %Actual inputs
 sol.x(:,1) = zeros(12,1);
 
-ref = 1;
-xref = [ref; ref; ref; deg2rad(20)];
+ref = -2;
+xref = [ref; ref; ref; deg2rad(45)];
 
 % simulate for 10 seconds
 for i = 1:length(t) - 1

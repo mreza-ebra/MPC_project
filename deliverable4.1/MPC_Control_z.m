@@ -40,8 +40,6 @@ classdef MPC_Control_z < MPC_Control
       x = sdpvar(n, N);
       u = sdpvar(m, N-1);
       
-      A = mpc.A;
-      B = mpc.B;
 
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
@@ -57,13 +55,18 @@ classdef MPC_Control_z < MPC_Control
       % v in V = { v | Mv <= m }
       M = [1;-1]; 
       m = [0.3; 0.2];
+      
+      % State Constraints
+      % x in X = { x | Fx <= f }
+      F = [0 0; 0 0];
+      f = [0;0];
 
     % WRITE THE CONSTRAINTS AND OBJECTIVE HERE
-      con = (x(:,2) == A*x(:,1) + B*u(:,1) + B*d_est) + (M*u(:,1) <= m);
+      con = (x(:,2) == mpc.A*x(:,1) + mpc.B*u(:,1)) + (M*u(:,1) <= m);
       obj = (u(:,1)-us)'*R*(u(:,1)-us);
 
       for i = 2:N-1
-          con = con + (x(:,i+1) == A*x(:,i) + B*u(:,i) + B*d_est);
+          con = con + (x(:,i+1) == mpc.A*x(:,i) + mpc.B*u(:,i));
           con = con + (M*u(:,i) <= m);
           obj = obj + (x(:,i)-xs)'*Q*(x(:,i)-xs) + (u(:,i)-us)'*R*(u(:,i)-us);
       end
@@ -91,17 +94,15 @@ classdef MPC_Control_z < MPC_Control
       n = size(mpc.A,1);
       xs = sdpvar(n, 1);
       us = sdpvar;
-      d_est = sdpvar;
       
       % Reference position (Ignore this before Todo 3.2)
       ref = sdpvar;  
-      A = mpc.A;
-      B = mpc.B;
+      
             
       % You can use the matrices mpc.A, mpc.B, mpc.C and mpc.D
       con = [-0.2 <= us <= 0.3, ...
-          xs == A*xs + B*us + B*d_est, ...
-          ref == mpc.C*xs];
+          xs == mpc.A*xs + mpc.B*us, ...
+          ref == mpc.C*xs + mpc.B(2)*us];
       obj = us^2;
       
       
@@ -121,19 +122,11 @@ classdef MPC_Control_z < MPC_Control
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
       % You can use the matrices mpc.A, mpc.B, mpc.C and mpc.D
-      A = mpc.A;
-      Bd = mpc.B;
-      B = Bd;
-      C = mpc.C;
-      nx   = size(A,1);
-      nu   = size(B,2);
-      ny   = size(C,1);
-
-      A_bar = [A,    Bd;
-               zeros(1,nx),1];
-      B_bar = [B;zeros(1,nu)];
-      C_bar = [C,0];
-      L = -place(A_bar',C_bar',[0.1,0.15,0.11])';
+      
+      A_bar = [];
+      B_bar = [];
+      C_bar = [];
+      L = [];
       
       % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE 
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
