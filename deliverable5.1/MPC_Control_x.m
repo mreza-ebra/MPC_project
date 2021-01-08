@@ -29,7 +29,7 @@ classdef MPC_Control_x < MPC_Control
       % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are 
       %       the DISCRETE-TIME MODEL of your system
       
-      Q = 1*eye(n);
+      Q = 5*eye(n);
       R = 7;
       
       % Input Constraints
