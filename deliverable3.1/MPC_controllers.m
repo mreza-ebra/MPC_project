@@ -12,7 +12,11 @@ quad = Quad(Ts);
 sys = quad.linearize(xs, us);
 [sys_x, sys_y, sys_z, sys_yaw] = quad.decompose(sys, xs, us);
 % Design MPC controller
-mpc_x = MPC_Control_x(sys_x, Ts);
+
+% mpc_x = MPC_Control_x(sys_x, Ts);
+mpc_x = MPC_Control_y(sys_y, Ts);
+% mpc_x = MPC_Control_z(sys_z, Ts);
+% mpc_x = MPC_Control_yaw(sys_yaw, Ts);
 
 A = mpc_x.A; %don't forget the "_x" indice
 B = mpc_x.B;
@@ -73,55 +77,55 @@ time = 0:Ts:((nsteps-1)*Ts);
 settling_time = 8;
 t= 0:Ts:((nsteps-1)*Ts);
 
-subplot(5,1,1)
-hold on; grid on;
-title('System x')
-% title('System y')
-plot(time, x_hist(1,:),'-k','markersize',20,'linewidth',2);
-ylabel('$\dot{\beta}[rad/s]$','interpreter','latex');
-% ylabel('$\dot{\alpha}[rad/s]$','interpreter','latex');
-
-subplot(5,1,2)
-hold on; grid on;
-plot(time, x_hist(2,:),'-k','markersize',20,'linewidth',2);
-ylabel('$\beta[rad]$','interpreter','latex');
-% ylabel('$\alpha[rad]$','interpreter','latex');
-
-subplot(5,1,3)
-hold on; grid on;
-plot(time, x_hist(3,:),'-k','markersize',20,'linewidth',2);
-ylabel('$\dot{x}[m/s]$','interpreter','latex');
-% ylabel('$\dot{y}[m/s]$','interpreter','latex');
-
-subplot(5,1,4)
-hold on; grid on;
-plot(time, x_hist(4,:),'-k','markersize',20,'linewidth',2);
-ylabel('$x[m]$','interpreter','latex');
-% ylabel('$y[m]$','interpreter','latex');
-
-subplot(5,1,5)
-hold on; grid on;
-plot(time, u_hist,'-k','markersize',20,'linewidth',2);
-ylabel('$input[N.m]$','interpreter','latex');
-xlabel('$time[s]$','interpreter','latex');
-
-
-% subplot(3,1,1)
+% subplot(5,1,1)
 % hold on; grid on;
-% title('System yaw')
-% % title('System z')
-% plot(time, x_hist(3,:),'-k','markersize',20,'linewidth',2);
-% % ylabel('$\dot{z}[m/s]$','interpreter','latex');
-% ylabel('$\dot{yaw}[m/s]$','interpreter','latex');
+% % title('System x')
+% title('System y')
+% plot(time, x_hist(1,:),'-k','markersize',20,'linewidth',2);
+% % ylabel('$\dot{\beta}[rad/s]$','interpreter','latex');
+% ylabel('$\dot{\alpha}[rad/s]$','interpreter','latex');
 % 
-% subplot(3,1,2)
+% subplot(5,1,2)
+% hold on; grid on;
+% plot(time, x_hist(2,:),'-k','markersize',20,'linewidth',2);
+% % ylabel('$\beta[rad]$','interpreter','latex');
+% ylabel('$\alpha[rad]$','interpreter','latex');
+% 
+% subplot(5,1,3)
+% hold on; grid on;
+% plot(time, x_hist(3,:),'-k','markersize',20,'linewidth',2);
+% % ylabel('$\dot{x}[m/s]$','interpreter','latex');
+% ylabel('$\dot{y}[m/s]$','interpreter','latex');
+% 
+% subplot(5,1,4)
 % hold on; grid on;
 % plot(time, x_hist(4,:),'-k','markersize',20,'linewidth',2);
-% % ylabel('$z[m]$','interpreter','latex');
-% ylabel('$yaw[m]$','interpreter','latex');
+% % ylabel('$x[m]$','interpreter','latex');
+% ylabel('$y[m]$','interpreter','latex');
 % 
-% subplot(3,1,3)
+% subplot(5,1,5)
 % hold on; grid on;
 % plot(time, u_hist,'-k','markersize',20,'linewidth',2);
 % ylabel('$input[N.m]$','interpreter','latex');
 % xlabel('$time[s]$','interpreter','latex');
+
+
+subplot(3,1,1)
+hold on; grid on;
+% title('System yaw')
+title('System z')
+plot(time, x_hist(3,:),'-k','markersize',20,'linewidth',2);
+ylabel('$\dot{z}[m/s]$','interpreter','latex');
+% ylabel('$\dot{yaw}[m/s]$','interpreter','latex');
+
+subplot(3,1,2)
+hold on; grid on;
+plot(time, x_hist(4,:),'-k','markersize',20,'linewidth',2);
+ylabel('$z[m]$','interpreter','latex');
+% ylabel('$yaw[m]$','interpreter','latex');
+
+subplot(3,1,3)
+hold on; grid on;
+plot(time, u_hist,'-k','markersize',20,'linewidth',2);
+ylabel('$input[N.m]$','interpreter','latex');
+xlabel('$time[s]$','interpreter','latex');
